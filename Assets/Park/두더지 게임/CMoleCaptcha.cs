@@ -256,7 +256,7 @@ public class CMoleCaptcha : MonoBehaviour
     {
         if (scoreText != null)
         {
-            scoreText.text = $"두더지를 잡으세요! {_currentHits}/{targetHitCount}";
+            scoreText.text = $"Whack A Mole! {_currentHits}/{targetHitCount}";
         }
     }
 }

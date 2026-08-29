@@ -9334,6 +9334,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 71360915319042860, guid: 0ace033c6ca9ea14880f5fcb0b05bd44, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 589662646774188969, guid: 0ace033c6ca9ea14880f5fcb0b05bd44, type: 3}
       propertyPath: m_Name
       value: WhackAMole

@@ -41,7 +41,9 @@ public class Ball_Ctrl : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Goal"))
         {
+            GotoStartPos();
             CGameManager.Instance.StageClear();
+            
         }
 
     }

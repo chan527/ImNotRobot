@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,6 +13,16 @@ public class CGameManager : MonoBehaviour
     [Tooltip("순서대로 고정 진행할 스테이지 개수를 설정합니다 (예: 3 설정 시 1~3 스테이지 고정).")]
     [SerializeField] private int _fixedStage = 3;
 
+    [Header("UI Settings")]
+    [Tooltip("실패 시 화면 중앙에 띄울 Fail Text GameObject를 연결하세요.")]
+    [SerializeField] private GameObject failTextObject;
+
+    [Tooltip("일반 스테이지 클리어 시 화면 중앙에 띄울 Success Text GameObject를 연결하세요.")]
+    [SerializeField] private GameObject successTextObject;
+
+    [Tooltip("모든 스테이지를 최종 클리어(MaxStage 도달)했을 때 화면 중앙에 띄울 All Clear Text GameObject를 연결하세요.")]
+    [SerializeField] private GameObject allClearTextObject;
+
     [Header("Stage Inspector")]
     [Tooltip("앞쪽 인덱스는 _fixedStage 수만큼 고정 배치되고, 그 이후 인덱스부터 무작위로 등장합니다.")]
     [SerializeField] public List<GameObject> stagePrefabList = new List<GameObject>(); // 프리팹 방식일 경우
@@ -22,7 +33,7 @@ public class CGameManager : MonoBehaviour
     private bool _isTimerRunning = true;
 
     private List<int> _selectedStageList = new List<int>();
-    bool _isTimeCustomed = false;
+
     private void Awake()
     {
         if (Instance == null)
@@ -38,6 +49,11 @@ public class CGameManager : MonoBehaviour
 
     private void Start()
     {
+        // 게임 시작 시 UI 텍스트들이 켜져있다면 숨김 처리
+        if (failTextObject != null) failTextObject.SetActive(false);
+        if (successTextObject != null) successTextObject.SetActive(false);
+        if (allClearTextObject != null) allClearTextObject.SetActive(false);
+
         ChooseStageSequence();
         UpdateStageUI(_currentStage);
     }
@@ -67,47 +83,129 @@ public class CGameManager : MonoBehaviour
 
     public void StartTimer()
     {
-        if (!_isTimeCustomed)
-            _currentTimer = stageLimitTime;
-
+        _currentTimer = stageLimitTime;
         _isTimerRunning = true;
     }
-    public void TimeDown(float stageCustomTime)
-    {
-        _currentTimer = stageCustomTime;
-        _isTimeCustomed = true;
-    }
-
 
     public void StageClear()
     {
         Debug.Log($"[Stage {_currentStage}] 스테이지 클리어!");
 
-        if (_currentStage < _maxStage)
+        // 진행 중인 타이머 멈춤 및 Success 코루틴 실행
+        _isTimerRunning = false;
+        StartCoroutine(StageClearRoutine());
+    }
+
+    private IEnumerator StageClearRoutine()
+    {
+        // 마지막 스테이지인지 확인
+        bool isFinalStage = (_currentStage >= _maxStage);
+
+        if (!isFinalStage)
         {
+            // 1. 일반 스테이지 클리어 팝업 애니메이션 재생 (약 1초 소요)
+            if (successTextObject != null)
+            {
+                yield return StartCoroutine(PopUpAnimation(successTextObject, 1.0f));
+            }
+            else
+            {
+                yield return new WaitForSeconds(1.0f);
+            }
+
+            // 2. 다음 스테이지 이동
             _currentStage++;
             UpdateStageUI(_currentStage);
         }
         else
         {
-            Debug.Log("모든 스테이지 올 클리어!");
+            // 1. 최종 올 클리어 팝업 애니메이션 재생 (약 1초 소요)
+            if (allClearTextObject != null)
+            {
+                yield return StartCoroutine(PopUpAnimation(allClearTextObject, 1.0f));
+            }
+            else
+            {
+                yield return new WaitForSeconds(1.0f);
+            }
+
+            Debug.Log("모든 스테이지 올 클리어 완료!");
+            // TODO: 메인 씬으로 이동하거나 엔딩 팝업 연동 등을 이곳에 추가할 수 있습니다.
         }
     }
 
     public void StageFailed()
     {
-        Debug.Log($"[Stage {_currentStage}] 실패 - 1스테이지로 리셋");
+        Debug.Log($"[Stage {_currentStage}] 실패 - 1초 후 1스테이지로 리셋됩니다.");
 
+        // 진행 중인 타이머 멈춤 및 Fail 코루틴 실행
+        _isTimerRunning = false;
+        StartCoroutine(StageFailedRoutine());
+    }
+
+    private IEnumerator StageFailedRoutine()
+    {
+        // 1. Fail 팝업 애니메이션 재생 (약 1초 소요)
+        if (failTextObject != null)
+        {
+            yield return StartCoroutine(PopUpAnimation(failTextObject, 1.0f));
+        }
+        else
+        {
+            yield return new WaitForSeconds(1.0f);
+        }
+
+        // 2. 게임 리셋 및 재시작
         _currentStage = 1;
         ChooseStageSequence(); // 실패 시 고정 구간 이후 랜덤 순서 재구성
         UpdateStageUI(_currentStage);
+    }
+
+    /// <summary>
+    /// 지정된 오브젝트를 빠르게 커지게 만든 뒤 유지했다가 비활성화하는 팝업 코루틴
+    /// </summary>
+    private IEnumerator PopUpAnimation(GameObject targetObj, float totalDuration)
+    {
+        targetObj.SetActive(true);
+
+        Transform targetTransform = targetObj.transform;
+        Vector3 defaultScale = Vector3.one; // 기본 크기 (1, 1, 1)
+
+        // 0.25초 동안 0에서 1로 확대
+        float popDuration = 0.25f;
+        float elapsed = 0f;
+
+        targetTransform.localScale = Vector3.zero;
+
+        while (elapsed < popDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / popDuration;
+
+            // SmoothStep으로 튕기듯 부드럽게 커지는 연출
+            float smoothT = Mathf.SmoothStep(0f, 1f, t);
+            targetTransform.localScale = Vector3.Lerp(Vector3.zero, defaultScale, smoothT);
+
+            yield return null;
+        }
+
+        targetTransform.localScale = defaultScale;
+
+        // 전체 1초 중 남아있는 시간 동안 화면 유지
+        float remainingTime = totalDuration - popDuration;
+        if (remainingTime > 0f)
+        {
+            yield return new WaitForSeconds(remainingTime);
+        }
+
+        targetObj.SetActive(false);
     }
 
     private void UpdateStageUI(int stage)
     {
         // 등록된 모든 퍼즐을 비활성화 (이전 퍼즐 잔재 제거)
         DisableAllStagePrefabs();
-        _isTimeCustomed = false;
+
         int targetIndex = stage - 1;
 
         // 유효성 검사: 선택된 인덱스 리스트 및 프리팹 리스트 범위 안인지 확인
@@ -117,8 +215,8 @@ public class CGameManager : MonoBehaviour
 
             if (prefabIndex >= 0 && prefabIndex < stagePrefabList.Count && stagePrefabList[prefabIndex] != null)
             {
-                StartTimer();
                 stagePrefabList[prefabIndex].SetActive(true);
+                StartTimer();
                 Debug.Log($"Stage {stage} (프리팹 인덱스: {prefabIndex}) 활성화");
             }
             else
@@ -159,7 +257,6 @@ public class CGameManager : MonoBehaviour
             return;
         }
 
-        // 음수 입력 방지 및 전체 프리팹 개수를 초과하지 않도록 보장
         int actualFixedCount = Mathf.Clamp(_fixedStage, 0, stagePrefabList.Count);
 
         // 1. 고정 스테이지 순서대로 추가 (0 ~ actualFixedCount - 1)
@@ -185,10 +282,9 @@ public class CGameManager : MonoBehaviour
             randomIndices[randomIndex] = temp;
         }
 
-        // 4. 셔플된 무작위 인덱스들을 최종 리스트 뒤에 합치기
+        // 4. 셔플된 무작위 인덱스들을 최종 리스트에 합치기
         _selectedStageList.AddRange(randomIndices);
 
-        // 경고 메시지 처리
         if (stagePrefabList.Count < _maxStage)
         {
             Debug.LogWarning($"[CGameManager] 등록된 프리팹 수({stagePrefabList.Count})가 목표 스테이지 수({_maxStage})보다 적습니다.");
