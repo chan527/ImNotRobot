@@ -13,28 +13,37 @@ public class Ball_Ctrl : MonoBehaviour
         life_Text.text = "Life" + life.ToString();
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if(collision.gameObject.tag == "maze")
-        {
-            life--;
-            life_Text.text = "Life : " + life.ToString();
-            GotoStartPos();
+    //private void OnCollisionEnter(Collision collision)
+    //{
+    //    if(collision.gameObject.tag == "maze")
+    //    {
+    //        life--;
+    //        life_Text.text = "Life : " + life.ToString();
+    //        GotoStartPos();
             
-            if(life <= 0 )
-            {
-                //패배;
-            }
-        }
+    //        if(life <= 0 )
+    //        {
+    //            //패배;
+    //        }
+    //    }
 
-        if(collision.gameObject.tag == "Goal")
-        {
-            Debug.Log("Goal");
-        }
-    }
+    //    if(collision.gameObject.tag == "Goal")
+    //    {
+    //        Debug.Log("Goal");
+    //    }
+    //}
 
     public void GotoStartPos()
     {
         this.transform.position = startPos;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Goal"))
+        {
+            CGameManager.Instance.StageClear();
+        }
+
     }
 }
