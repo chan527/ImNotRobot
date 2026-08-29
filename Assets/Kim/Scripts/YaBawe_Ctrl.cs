@@ -75,6 +75,7 @@ public class YaBawe_Ctrl : MonoBehaviour
             if (score >= 2)
             {
                 CGameManager.Instance.StageClear();
+                yield break;
             }
         }
         else

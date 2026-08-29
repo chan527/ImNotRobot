@@ -40,7 +40,6 @@ public class BallMaze_Ctrl : MonoBehaviour
     public void MoveBtnClick(int _num)
     {
         rotateDir = 1 + (-2 * _num);
-        
     }
 
     public void MoveBtnUp()
