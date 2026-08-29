@@ -1,7 +1,6 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.InputSystem;
+
 public class BallMaze_Ctrl : MonoBehaviour
 {
     [SerializeField] Transform maze;
