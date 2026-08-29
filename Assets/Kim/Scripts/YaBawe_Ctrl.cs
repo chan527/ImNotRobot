@@ -5,25 +5,24 @@ using UnityEngine.UI;
 
 public class YaBawe_Ctrl : MonoBehaviour
 {
-    [SerializeField] private Button yes_Btn;
     [SerializeField] private Button[] no_Btns;
     [SerializeField] private RawImage action_BG;
     [SerializeField] private GameObject[] no_Object;
     [SerializeField] private RectTransform[] no_ObjRect;
     [SerializeField] Image[] fakeCoin_Img;
-    [SerializeField] Button[] realCoin_Btn;
+    [SerializeField] Image[] lifeCoin_Img;
+    [SerializeField] TMP_Text score_Text;
 
     int coin = 3;
 
     int score = 0;
+
+    int selectedNum;
     #region 유니티 라이프사이클
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()
     {
-        yes_Btn.onClick.AddListener(() =>
-        {
-            //성공
-        });
+        
 
         for (int i = 0; i < no_Btns.Length; i++)
         {
@@ -40,41 +39,50 @@ public class YaBawe_Ctrl : MonoBehaviour
     private void OnEnable()
     {
         coin = 3;
-        for (int i = 0; i < realCoin_Btn.Length; i++)
-        {
-            int j = i;
-
-            realCoin_Btn[i].onClick.AddListener(() =>
-            {
-                score++;
-
-                realCoin_Btn[j].gameObject.SetActive(false);
-                if(score >= 2)
-                {
-                    CGameManager.Instance.StageClear();
-                }
-            });
-        }
+        score_Text.text = "Score : " + score;
         for (int i = 0; i < no_Btns.Length; i++)
         {
             no_Btns[i].interactable = false;
         }
         //DiceReady();
         StartCoroutine(GameStart());
-        ReadyToPlay();
+  
     }
     #endregion
     void DiceReady()
     {
-        int rand = Random.Range(0, 3);
+        for (int i = 0; i < no_Btns.Length; i++)
+        {
+            no_Btns[i].gameObject.SetActive(false);
+        }
+        for (int i = 0; i < fakeCoin_Img.Length; i++)
+        {
+            fakeCoin_Img[i].gameObject.SetActive(false);
+        }
 
-        fakeCoin_Img[rand].gameObject.SetActive(true);
+        selectedNum = Random.Range(0, 3);
+
+        fakeCoin_Img[selectedNum].gameObject.SetActive(true);
     }
     IEnumerator CupClick(int num)
     {
         no_Btns[num].gameObject.SetActive(false);
-        coin--;
-        realCoin_Btn[coin].gameObject.SetActive(false);
+
+        if (selectedNum == num)
+        {
+            score++;
+            score_Text.text = "Score : " + score;
+            if (score >= 2)
+            {
+                CGameManager.Instance.StageClear();
+            }
+        }
+        else
+        {
+            coin--;
+            lifeCoin_Img[coin].gameObject.SetActive(false);
+        }
+        
 
         if(coin <= 0)
         {
@@ -93,32 +101,20 @@ public class YaBawe_Ctrl : MonoBehaviour
 
         StartCoroutine(GameStart());
     }
-    void ReadyToPlay()
-    {
-        for(int i =0; i < no_Btns.Length; i++)
-        {
-            no_Btns[i].gameObject.SetActive(!no_Btns[i].gameObject.activeSelf);
-        }
-    }
+    
 
     private IEnumerator GameStart()
     {
         DiceReady();
-        for (int i = 0; i < no_Btns.Length; i++)
-        {
-            no_Btns[i].gameObject.SetActive(false);
-        }
+        
         yield return new WaitForSecondsRealtime(2.5f);
 
-        ReadyToPlay();
+     
         for (int i = 0; i < no_Btns.Length; i++)
         {
             no_Btns[i].gameObject.SetActive(true);
         }
-        for (int i =0; i < fakeCoin_Img.Length; i++)
-        {
-            fakeCoin_Img[i].gameObject.SetActive(false);
-        }
+        
         int rand = Random.Range(5, 11);
 
         for (int i = 0; i < rand; i++)
