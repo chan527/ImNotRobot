@@ -14,7 +14,7 @@ public class CGameManager : MonoBehaviour
 
 
     [Header("Timer Settings")]
-    [SerializeField] private float stageLimitTime = 10f; // 스테이지당 제한시간 (초 단위)
+    [SerializeField] private float stageLimitTime = 60f; // 스테이지당 제한시간 (초 단위)
     private float _currentTimer = 60f;
     private bool _isTimerRunning = true;
 
@@ -58,7 +58,7 @@ public class CGameManager : MonoBehaviour
                 _isTimerRunning = false;
 
                 Debug.Log($"[Stage {_currentStage}] 시간 초과!");
-                OnStageFailed(); // 제한시간 초과 시 실패 처리
+                StageFailed(); // 제한시간 초과 시 실패 처리
             }
         }
     }
@@ -83,7 +83,7 @@ public class CGameManager : MonoBehaviour
             Debug.Log("모든 스테이지 올 클리어!");
         }
     }
-    public void OnStageFailed()
+    public void StageFailed()
     {
         Debug.Log($"[Stage {_currentStage}] 실패 - 1스테이지로 리셋");
 
