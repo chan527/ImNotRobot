@@ -46,9 +46,9 @@ public class CGameManager : MonoBehaviour
         {
             _currentTimer -= Time.deltaTime;
 
-            if (CStageTextManager.Instance != null)
+            if (CMainTextManager.Instance != null)
             {
-                CStageTextManager.Instance.SetTimerText(_currentTimer);
+                CMainTextManager.Instance.SetTimerText(_currentTimer);
             }
 
             // 타이머 UI 업데이트 (CStageTextManager에 타이머 표시용 함수가 있다면 활용)
