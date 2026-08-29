@@ -765,7 +765,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &919584249
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1121,6 +1121,7 @@ MonoBehaviour:
   _maxStage: 5
   stagePrefabList:
   - {fileID: 919584248}
+  stageLimitTime: 10
 --- !u!114 &1086479409
 MonoBehaviour:
   m_ObjectHideFlags: 0
