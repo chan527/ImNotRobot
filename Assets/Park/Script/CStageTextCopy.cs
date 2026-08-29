@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -94,7 +94,7 @@ public class CStageTextCopy : MonoBehaviour
             Debug.Log("[Captcha] 정답입니다!");
             if (CGameManager.Instance != null)
             {
-                CGameManager.Instance.StageSuccess();
+                CGameManager.Instance.StageClear();
             }
         }
         else
