@@ -10,11 +10,12 @@ public class YaBawe_Ctrl : MonoBehaviour
     [SerializeField] private RawImage action_BG;
     [SerializeField] private GameObject[] no_Object;
     [SerializeField] private RectTransform[] no_ObjRect;
-    [SerializeField] TextMeshProUGUI[] yN_Text;
-    [SerializeField] TextMeshProUGUI coin_Text;
+    [SerializeField] Image[] fakeCoin_Img;
+    [SerializeField] Button[] realCoin_Btn;
 
     int coin = 3;
 
+    int score = 0;
     #region 유니티 라이프사이클
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()
@@ -26,7 +27,7 @@ public class YaBawe_Ctrl : MonoBehaviour
 
         for (int i = 0; i < no_Btns.Length; i++)
         {
-            int j = i;
+            int j = i; 
             no_Btns[i].onClick.AddListener(() =>
             {
                 //실패
@@ -39,8 +40,26 @@ public class YaBawe_Ctrl : MonoBehaviour
     private void OnEnable()
     {
         coin = 3;
-        coin_Text.text = "Coin : " + coin.ToString();
-        DiceReady();
+        for (int i = 0; i < realCoin_Btn.Length; i++)
+        {
+            int j = i;
+
+            realCoin_Btn[i].onClick.AddListener(() =>
+            {
+                score++;
+
+                realCoin_Btn[j].gameObject.SetActive(false);
+                if(score >= 2)
+                {
+                    CGameManager.Instance.StageClear();
+                }
+            });
+        }
+        for (int i = 0; i < no_Btns.Length; i++)
+        {
+            no_Btns[i].interactable = false;
+        }
+        //DiceReady();
         StartCoroutine(GameStart());
         ReadyToPlay();
     }
@@ -49,17 +68,18 @@ public class YaBawe_Ctrl : MonoBehaviour
     {
         int rand = Random.Range(0, 3);
 
-        yN_Text[rand].text = "Y";
+        fakeCoin_Img[rand].gameObject.SetActive(true);
     }
     IEnumerator CupClick(int num)
     {
         no_Btns[num].gameObject.SetActive(false);
         coin--;
-        coin_Text.text = "Coin : " + coin.ToString();
+        realCoin_Btn[coin].gameObject.SetActive(false);
 
         if(coin <= 0)
         {
             //Game Over
+            CGameManager.Instance.OnStageFailed();
             yield break;
         }
 
@@ -68,11 +88,10 @@ public class YaBawe_Ctrl : MonoBehaviour
             no_Btns[i].interactable = false;
         }
         yield return new WaitForSeconds(0.5f);
-        DiceReady();
-        for(int i = 0; i < no_Btns.Length; i++)
-        {
-            no_Btns[i].gameObject.SetActive(false);
-        }
+
+        
+
+        StartCoroutine(GameStart());
     }
     void ReadyToPlay()
     {
@@ -84,14 +103,21 @@ public class YaBawe_Ctrl : MonoBehaviour
 
     private IEnumerator GameStart()
     {
-
+        DiceReady();
+        for (int i = 0; i < no_Btns.Length; i++)
+        {
+            no_Btns[i].gameObject.SetActive(false);
+        }
         yield return new WaitForSecondsRealtime(2.5f);
 
         ReadyToPlay();
-
-        for(int i =0; i < yN_Text.Length; i++)
+        for (int i = 0; i < no_Btns.Length; i++)
         {
-            yN_Text[i].text = "N";
+            no_Btns[i].gameObject.SetActive(true);
+        }
+        for (int i =0; i < fakeCoin_Img.Length; i++)
+        {
+            fakeCoin_Img[i].gameObject.SetActive(false);
         }
         int rand = Random.Range(5, 11);
 
@@ -137,5 +163,10 @@ public class YaBawe_Ctrl : MonoBehaviour
 
         uiA.anchoredPosition = startB;
         uiB.anchoredPosition = startA;
+
+        for (int i = 0; i < no_Btns.Length; i++)
+        {
+            no_Btns[i].interactable = true;
+        }
     }
 }

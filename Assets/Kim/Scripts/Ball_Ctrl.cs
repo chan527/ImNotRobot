@@ -6,11 +6,10 @@ public class Ball_Ctrl : MonoBehaviour
 
     int life = 5;
 
-    [SerializeField] TextMeshProUGUI life_Text;
     private void Start()
     {
         startPos = this.transform.position;
-        life_Text.text = "Life" + life.ToString();
+        
     }
 
     //private void OnCollisionEnter(Collision collision)
