@@ -1,5 +1,7 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -8,7 +10,7 @@ public class CMoleCaptcha : MonoBehaviour
 {
     [Header("UI Reference")]
     [SerializeField] private Transform tileGridParent;  // 5x5 Grid Panel
-    [SerializeField] private TextMeshProUGUI scoreText; // 팀원이 만든 TMP 텍스트 컴포넌트
+    [SerializeField] private TextMeshProUGUI scoreText; // TMP 텍스트 컴포넌트
 
     [Header("Mole Sprites")]
     [SerializeField] private Sprite normalMoleSprite;   // 기본 두더지 이미지
@@ -31,9 +33,8 @@ public class CMoleCaptcha : MonoBehaviour
 
     private int _currentHits = 0;
     private int _activeMoleIndex = -1;
-    private bool _isGameEnded = false;
 
-    private Coroutine _moleSpawnRoutine;
+    private CancellationTokenSource _cts;
 
     private void Awake()
     {
@@ -74,30 +75,40 @@ public class CMoleCaptcha : MonoBehaviour
 
     private void OnDisable()
     {
-        _isGameEnded = true;
-        StopAllCoroutines();
+        CancelTask();
     }
 
     public void StartMoleCaptcha()
     {
+        CancelTask();
+        _cts = new CancellationTokenSource();
+
         _currentHits = 0;
         _activeMoleIndex = -1;
-        _isGameEnded = false;
 
         UpdateDifficulty(_currentHits);
         UpdateScoreUI();
         ResetAllMoles();
 
-        if (_moleSpawnRoutine != null) StopCoroutine(_moleSpawnRoutine);
-        _moleSpawnRoutine = StartCoroutine(MoleSpawnRoutine());
+        MoleSpawnLoopAsync(_cts.Token).Forget();
+    }
+
+    private void CancelTask()
+    {
+        if (_cts != null)
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = null;
+        }
     }
 
     private void UpdateDifficulty(int hitCount)
     {
         if (hitCount >= 7)
         {
-            popUpDuration = 0.5f;
-            spawnInterval = 0.05f; // 0초 대기 대신 아주 짧은 프레임 대기 부여 (무한루프 방지)
+            popUpDuration = 0.6f;
+            spawnInterval = 0.05f; // 0f 대신 최소 간격을 두어 Delay 멈춤 현상 방지
         }
         else if (hitCount >= 3)
         {
@@ -111,75 +122,69 @@ public class CMoleCaptcha : MonoBehaviour
         }
     }
 
-    private IEnumerator MoleSpawnRoutine()
+    private async UniTask MoleSpawnLoopAsync(CancellationToken token)
     {
-        while (_currentHits < targetHitCount && !_isGameEnded)
+        try
         {
-            // 기존 두더지 강제 숨기기
-            if (_activeMoleIndex != -1)
+            while (_currentHits < targetHitCount)
             {
-                int oldIndex = _activeMoleIndex;
-                _activeMoleIndex = -1;
-                StartCoroutine(AnimateMole(oldIndex, hideY));
-            }
-
-            // 출몰 간격 대기
-            if (spawnInterval > 0f)
-            {
-                yield return new WaitForSeconds(spawnInterval);
-            }
-
-            if (_isGameEnded) yield break;
-
-            // 랜덤 타일 선택 (이전 타일과 중복 방지 조건 포함)
-            if (_tileButtons.Count > 0)
-            {
-                _activeMoleIndex = Random.Range(0, _tileButtons.Count);
-
-                if (_activeMoleIndex < _moleImages.Count && normalMoleSprite != null)
+                // 이미 활성화된 두더지가 있으면 숨기기
+                if (_activeMoleIndex != -1)
                 {
-                    _moleImages[_activeMoleIndex].sprite = normalMoleSprite;
+                    int oldIndex = _activeMoleIndex;
+                    _activeMoleIndex = -1;
+                    AnimateMoleAsync(oldIndex, hideY, token).Forget();
                 }
 
-                yield return StartCoroutine(AnimateMole(_activeMoleIndex, showY));
-            }
+                // 출몰 간격 대기 (spawnInterval이 항상 0보다 크도록 보장)
+                if (spawnInterval > 0f)
+                {
+                    await UniTask.Delay(TimeSpan.FromSeconds(spawnInterval), cancellationToken: token);
+                }
 
-            // 두더지가 나와서 머무는 시간 대기
-            float timer = 0f;
-            while (timer < popUpDuration && _activeMoleIndex != -1 && !_isGameEnded)
-            {
-                timer += Time.deltaTime;
-                yield return null;
+                if (_tileButtons.Count > 0)
+                {
+                    _activeMoleIndex = UnityEngine.Random.Range(0, _tileButtons.Count);
+
+                    if (_activeMoleIndex < _moleImages.Count && normalMoleSprite != null)
+                    {
+                        _moleImages[_activeMoleIndex].sprite = normalMoleSprite;
+                    }
+
+                    await AnimateMoleAsync(_activeMoleIndex, showY, token);
+                }
+
+                // 지정된 시간 동안 솟아오른 상태 유지 (클릭 시 _activeMoleIndex가 -1이 되어 대기 탈출)
+                float timer = 0f;
+                while (timer < popUpDuration && _activeMoleIndex != -1)
+                {
+                    timer += Time.deltaTime;
+                    await UniTask.Yield(PlayerLoopTiming.Update, token);
+                }
             }
+        }
+        catch (OperationCanceledException)
+        {
+            // 루프 정상 종료
         }
     }
 
     private void OnTileClicked(int clickedIndex)
     {
-        if (_isGameEnded) return;
-
-        // 현재 등장한 두더지를 클릭한 경우
         if (clickedIndex == _activeMoleIndex)
         {
             int targetIndex = _activeMoleIndex;
-            _activeMoleIndex = -1; // 즉시 active 해제하여 중복 클릭 방지
+            _activeMoleIndex = -1; // 즉시 active 해제
 
             _currentHits++;
             UpdateScoreUI();
             UpdateDifficulty(_currentHits);
 
-            // 타격 효과 및 들어가기 코루틴 실행
-            StartCoroutine(HitAndHideRoutine(targetIndex));
+            HitAndHideAsync(targetIndex, this.GetCancellationTokenOnDestroy()).Forget();
 
-            // 목표 달성 확인
             if (_currentHits >= targetHitCount)
             {
-                _isGameEnded = true;
-
-                if (_moleSpawnRoutine != null)
-                {
-                    StopCoroutine(_moleSpawnRoutine);
-                }
+                CancelTask(); // 성공 시 스폰 루프 취소
 
                 Debug.Log("[MoleCaptcha] 성공!");
                 if (CGameManager.Instance != null)
@@ -190,16 +195,16 @@ public class CMoleCaptcha : MonoBehaviour
         }
     }
 
-    private IEnumerator HitAndHideRoutine(int index)
+    private async UniTask HitAndHideAsync(int index, CancellationToken token)
     {
         if (index >= 0 && index < _moleImages.Count && hitMoleSprite != null)
         {
             _moleImages[index].sprite = hitMoleSprite;
         }
 
-        yield return new WaitForSeconds(hitEffectDelay);
+        await UniTask.Delay(TimeSpan.FromSeconds(hitEffectDelay), cancellationToken: token);
 
-        yield return StartCoroutine(AnimateMole(index, hideY));
+        await AnimateMoleAsync(index, hideY, token);
 
         if (index >= 0 && index < _moleImages.Count && normalMoleSprite != null)
         {
@@ -207,9 +212,9 @@ public class CMoleCaptcha : MonoBehaviour
         }
     }
 
-    private IEnumerator AnimateMole(int index, float targetY)
+    private async UniTask AnimateMoleAsync(int index, float targetY, CancellationToken token)
     {
-        if (index < 0 || index >= _moleTransforms.Count) yield break;
+        if (index < 0 || index >= _moleTransforms.Count) return;
 
         RectTransform mole = _moleTransforms[index];
         mole.gameObject.SetActive(true);
@@ -219,7 +224,7 @@ public class CMoleCaptcha : MonoBehaviour
         while (Vector2.Distance(mole.anchoredPosition, targetPos) > 0.1f)
         {
             mole.anchoredPosition = Vector2.MoveTowards(mole.anchoredPosition, targetPos, moveSpeed * Time.deltaTime);
-            yield return null;
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
         }
 
         mole.anchoredPosition = targetPos;
