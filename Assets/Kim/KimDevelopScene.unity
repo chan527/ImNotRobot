@@ -1981,7 +1981,8 @@ PrefabInstance:
       value: PenniWise_Canvas
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1436420463968429685, guid: 66f73887de527e949b931256565d93e4, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 66f73887de527e949b931256565d93e4, type: 3}
