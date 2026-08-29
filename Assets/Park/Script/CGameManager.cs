@@ -6,12 +6,18 @@ public class CGameManager : MonoBehaviour
     // 외부에서 CMainGameManager.Instance 로 접근
     public static CGameManager Instance { get; private set; }
     [SerializeField] private int _currentStage = 1;
+
     [SerializeField] private int _maxStage = 5;
 
     [Header("Stage Inspector")]
     [SerializeField]public List<GameObject> stagePrefabList = new List<GameObject>(); // 프리팹 방식일 경우
 
-    
+
+    [Header("Timer Settings")]
+    [SerializeField] private float stageLimitTime = 10f; // 스테이지당 제한시간 (초 단위)
+    private float _currentTimer = 60f;
+    private bool _isTimerRunning = true;
+
     private List<int> _selectedStageList = new List<int>();
     
 
@@ -33,10 +39,36 @@ public class CGameManager : MonoBehaviour
         UpdateStageUI(_currentStage);
     }
 
-    /// <summary>
-    /// 팀원 퍼즐 성공 시 호출하는 함수
-    /// </summary>
-    public void StageSuccess()
+    private void Update()
+    {
+        // 타이머 카운트다운 로직
+        if (_isTimerRunning)
+        {
+            _currentTimer -= Time.deltaTime;
+
+            if (CStageTextManager.Instance != null)
+            {
+                CStageTextManager.Instance.SetTimerText(_currentTimer);
+            }
+
+            // 타이머 UI 업데이트 (CStageTextManager에 타이머 표시용 함수가 있다면 활용)
+            if (_currentTimer <= 0f)
+            {
+                _currentTimer = 0f;
+                _isTimerRunning = false;
+
+                Debug.Log($"[Stage {_currentStage}] 시간 초과!");
+                OnStageFailed(); // 제한시간 초과 시 실패 처리
+            }
+        }
+    }
+    public void StartTimer()
+    {
+        _currentTimer = stageLimitTime;
+        _isTimerRunning = true;
+    }
+
+    public void StageClear()
     {
         Debug.Log($"[Stage {_currentStage}] 스테이지 클리어!");
 
@@ -53,7 +85,7 @@ public class CGameManager : MonoBehaviour
     }
     public void OnStageFailed()
     {
-        Debug.Log($"[Stage {_currentStage}] 실패 - 셔플 재구성 후 1스테이지로 리셋");
+        Debug.Log($"[Stage {_currentStage}] 실패 - 1스테이지로 리셋");
 
         _currentStage = 1;
         ChooseStageSequence(); // 실패 시 무작위 순서 재구성
@@ -74,6 +106,7 @@ public class CGameManager : MonoBehaviour
             int PrefabIndex = _selectedStageList[targetIndex];
 
             stagePrefabList[PrefabIndex].SetActive(true);
+            StartTimer();
             Debug.Log($"Stage{stage} 스테이지 활성화");
 
         }

@@ -7,6 +7,8 @@ public class CStageTextManager : MonoBehaviour
     [Header("UI Reference")]
     [SerializeField] private Text stageText; // Legacy Text 컴포넌트 연결
 
+    [SerializeField] private Text timerText; // 남은 시간 표시용 Legacy Text
+
     private void Awake()
     {
         if (Instance == null)
@@ -17,6 +19,14 @@ public class CStageTextManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+        }
+    }
+
+    public void SetTimerText(float remainingTime)
+    {
+        if (timerText != null)
+        {
+            timerText.text = $"TIME: {remainingTime:F0}s";
         }
     }
 
