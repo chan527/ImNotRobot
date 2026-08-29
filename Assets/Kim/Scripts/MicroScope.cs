@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using UnityEditor;
-using System.Collections;
 
 public class Magnifier_Ctrl : MonoBehaviour
 {
@@ -20,12 +19,6 @@ public class Magnifier_Ctrl : MonoBehaviour
     [SerializeField] private float detectDistance = 100f;
     [SerializeField] private float magnification = 1.5f;
 
-    //[SerializeField] Image[] images;
-    [SerializeField] TMP_Text input_text;
-    [SerializeField] TMP_Text warning_text;
-
-    int life = 3;
-
     string password = "0830";
 
     private bool isMagnifierActive = false;
@@ -39,12 +32,7 @@ public class Magnifier_Ctrl : MonoBehaviour
     private Dictionary<TMP_Text, Vector3> originalScaleDictionary
         = new Dictionary<TMP_Text, Vector3>();
 
-    private void OnEnable()
-    {
-        life = 3;
-        inputed = null;
-        warning_text.gameObject.SetActive(false);
-    }
+
     private void Start()
     {
         magnifier_Rect.gameObject.SetActive(false);
@@ -289,12 +277,10 @@ public class Magnifier_Ctrl : MonoBehaviour
     }
 
     string inputed;
-    public void InputPWD(int pwd)
+    public void InputPWD(string pwd)
     {
-        //Debug.Log("Clicked");
-        inputed += pwd.ToString();
-        //Debug.Log(inputed);
-        input_text.text = inputed;
+        inputed += pwd;
+        Debug.Log(inputed);
         if (inputed.Length >= 4)
         {
             if (password == inputed)
@@ -304,25 +290,9 @@ public class Magnifier_Ctrl : MonoBehaviour
             else
             {
                 inputed = null;
-                //life--;
-                //images[life].gameObject.SetActive(false);
-
-                //if(life <= 0)
-                //   CGameManager.Instance.StageFailed();
-                warning_text.gameObject.SetActive(true);
-   
-                StartCoroutine(DeleteNumber());
             }
         }
-        
 
-    }
 
-    IEnumerator DeleteNumber()
-    {
-        yield return new WaitForSeconds(2.5f);
-
-        warning_text.gameObject.SetActive(false);
-        input_text.text = inputed;
     }
 }
