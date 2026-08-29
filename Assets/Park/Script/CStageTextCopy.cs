@@ -102,7 +102,7 @@ public class CStageTextCopy : MonoBehaviour
             Debug.Log("[Captcha] 오답입니다!");
             if (CGameManager.Instance != null)
             {
-                CGameManager.Instance.StageFailed();
+                CGameManager.Instance.OnStageFailed();
             }
         }
     }
