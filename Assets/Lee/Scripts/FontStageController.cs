@@ -155,7 +155,7 @@ public class FontStageController : MonoBehaviour
 
         if (currentFontMode != FontMode.Clear)
             return false;
-
+        CGameManager.Instance.StageClear();
         return answerInput.text == answers[currentAnswerIndex];
     }
 
