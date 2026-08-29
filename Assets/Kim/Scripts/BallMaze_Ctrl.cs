@@ -18,7 +18,7 @@ public class BallMaze_Ctrl : MonoBehaviour
     private Vector3 moveDir = Vector3.down;
     private float previousAngle;
 
-    float remainTime = 60f;
+    float remainTime = 300f;
     private void Start()
     {
         previousAngle = ctrl_Slider.value * 360f;
@@ -31,12 +31,18 @@ public class BallMaze_Ctrl : MonoBehaviour
         rb.linearVelocity = moveDir * moveSpeed;
         remainTime = remainTime - Time.fixedDeltaTime;
 
+        remainTime_Text.text = remainTime.ToString("F1");
         if(remainTime <= 0)
         {
             //종료 호출
         }
     }
 
+    private void OnEnable()
+    {
+        remainTime = 300f;
+        remainTime_Text.text = remainTime.ToString("F1");
+    }
     private void ChangeDirection(float value)
     {
         float currentAngle = value * 360f;

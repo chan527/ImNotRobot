@@ -18,7 +18,7 @@ public class Ball_Ctrl : MonoBehaviour
         if(collision.gameObject.tag == "maze")
         {
             life--;
-            life_Text.text = "Life" + life.ToString();
+            life_Text.text = "Life : " + life.ToString();
             GotoStartPos();
             
             if(life <= 0 )
@@ -29,7 +29,7 @@ public class Ball_Ctrl : MonoBehaviour
 
         if(collision.gameObject.tag == "Goal")
         {
-
+            Debug.Log("Goal");
         }
     }
 

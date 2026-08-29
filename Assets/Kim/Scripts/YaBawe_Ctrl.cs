@@ -57,8 +57,35 @@ public class YaBawe_Ctrl : MonoBehaviour
 
             
         }
-        
+                
+    }
 
-        
+    IEnumerator SwapUI(RectTransform uiA, RectTransform uiB, float duration = 0.5f)
+    {
+        Vector2 startA = uiA.anchoredPosition;
+        Vector2 startB = uiB.anchoredPosition;
+
+        float time = 0f;
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            float t = Mathf.Clamp01(time / duration);
+
+            Vector2 offset = new Vector2(0, 100);
+
+            uiA.anchoredPosition =
+                Vector2.Lerp(startA, startB, t)
+                + offset * Mathf.Sin(t * Mathf.PI);
+
+            uiB.anchoredPosition =
+                Vector2.Lerp(startB, startA, t)
+                - offset * Mathf.Sin(t * Mathf.PI);
+
+            yield return null;
+        }
+
+        uiA.anchoredPosition = startB;
+        uiB.anchoredPosition = startA;
     }
 }
