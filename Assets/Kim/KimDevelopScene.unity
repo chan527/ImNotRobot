@@ -1896,6 +1896,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 196864319745890193, guid: 66f73887de527e949b931256565d93e4, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1270730454320070697, guid: 66f73887de527e949b931256565d93e4, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1359417470514680522, guid: 66f73887de527e949b931256565d93e4, type: 3}
+      propertyPath: m_Name
+      value: LifeCoin_Img2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2334210231773866878, guid: 66f73887de527e949b931256565d93e4, type: 3}
+      propertyPath: m_Name
+      value: LifeCoin_Img3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2807359309148212708, guid: 66f73887de527e949b931256565d93e4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3509629595451152580, guid: 66f73887de527e949b931256565d93e4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3551925938107392116, guid: 66f73887de527e949b931256565d93e4, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -1976,13 +2000,32 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3712774489209955994, guid: 66f73887de527e949b931256565d93e4, type: 3}
+      propertyPath: m_Name
+      value: LifeCoin_Img
+      objectReference: {fileID: 0}
     - target: {fileID: 4954180821005532891, guid: 66f73887de527e949b931256565d93e4, type: 3}
       propertyPath: m_Name
       value: PenniWise_Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 5355294906361187476, guid: 66f73887de527e949b931256565d93e4, type: 3}
+      propertyPath: m_text
+      value: Find Coin 2 times
+      objectReference: {fileID: 0}
+    - target: {fileID: 6570766120720099641, guid: 66f73887de527e949b931256565d93e4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6920951381019159195, guid: 66f73887de527e949b931256565d93e4, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8461862208058432730, guid: 66f73887de527e949b931256565d93e4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects:
-    - {fileID: 1436420463968429685, guid: 66f73887de527e949b931256565d93e4, type: 3}
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 66f73887de527e949b931256565d93e4, type: 3}
