@@ -118,7 +118,7 @@ public class TextCopyStageController : MonoBehaviour
             Debug.Log("[Captcha] 오답입니다!");
             if (CGameManager.Instance != null)
             {
-                CGameManager.Instance.OnStageFailed();
+                CGameManager.Instance.StageFailed();
             }
         }
     }
