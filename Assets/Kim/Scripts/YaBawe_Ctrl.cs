@@ -87,7 +87,7 @@ public class YaBawe_Ctrl : MonoBehaviour
         if(coin <= 0)
         {
             //Game Over
-            CGameManager.Instance.OnStageFailed();
+            CGameManager.Instance.StageFailed();
             yield break;
         }
 

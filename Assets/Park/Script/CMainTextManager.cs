@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI; 
-public class CStageTextManager : MonoBehaviour
+public class CMainTextManager : MonoBehaviour
 {
-    public static CStageTextManager Instance { get; private set; }
+    public static CMainTextManager Instance { get; private set; }
 
     [Header("UI Reference")]
     [SerializeField] private Text stageText; // Legacy Text 컴포넌트 연결
