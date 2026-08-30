@@ -39,6 +39,7 @@ public class YaBawe_Ctrl : MonoBehaviour
     private void OnEnable()
     {
         coin = 3;
+        score = 0;
         score_Text.text = "Score : " + score;
         for (int i = 0; i < no_Btns.Length; i++)
         {
@@ -75,6 +76,7 @@ public class YaBawe_Ctrl : MonoBehaviour
             if (score >= 2)
             {
                 CGameManager.Instance.StageClear();
+                yield break;
             }
         }
         else

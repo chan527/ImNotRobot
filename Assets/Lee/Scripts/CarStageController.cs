@@ -227,12 +227,12 @@ public class CarStageController : MonoBehaviour
         if (isCorrect)
         {
             Debug.Log("자동차 스테이지 클리어!");
-            //CGameManager.Instance.StageClear();
+            CGameManager.Instance.StageClear();
         }
         else
         {
             Debug.Log("자동차 스테이지 실패");
-            //CGameManager.Instance.OnStageFailed();
+            CGameManager.Instance.StageFailed();
         }
     }
 
