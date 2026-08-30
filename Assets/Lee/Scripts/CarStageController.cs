@@ -11,6 +11,7 @@ public class CarStageController : MonoBehaviour
     [SerializeField] private RectTransform carRect;    // CarImage
     [SerializeField] private GameObject redLight;
     [SerializeField] private GameObject greenLight;
+    [SerializeField] private GameObject feedbackText;
 
     [SerializeField] private Transform tileRoot;
     [SerializeField] private int[] carTileIndices;
@@ -22,7 +23,7 @@ public class CarStageController : MonoBehaviour
     [SerializeField] private Vector2 endPos = new Vector2(100f, -22f);
     [SerializeField] private float departureDelay = 0.5f;
     [SerializeField] private float driveDuration = 1f;
-    [SerializeField] private float verificationDelay = 1f;
+    [SerializeField] private float verificationDelay = 2f;
 
     private Canvas rootCanvas;
     private TMP_Text verifyButtonText;
@@ -113,6 +114,7 @@ public class CarStageController : MonoBehaviour
 
     private void InitStage()
     {
+        feedbackText.SetActive(false);
         carRect.gameObject.SetActive(true);
         carRect.anchoredPosition = startPos;
         carRect.localScale = new Vector3(-1f, 1f, 1f);
@@ -217,6 +219,10 @@ public class CarStageController : MonoBehaviour
     private void ValidateCurrentSelection()
     {
         bool hasNoSelectedTiles = tiles.All(tile => !tile.isOn);
+
+        if (!hasNoSelectedTiles)
+            feedbackText.SetActive(true);
+
         StartCoroutine(CompleteVerification(hasNoSelectedTiles));
     }
 
