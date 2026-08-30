@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,6 +32,7 @@ public class CGameManager : MonoBehaviour
     private float _currentTimer = 60f;
     private bool _isTimerRunning = true;
     private bool _stageClear;
+    private bool _isTimeDown = false;
 
     private List<int> _selectedStageList = new List<int>();
 
@@ -84,8 +85,15 @@ public class CGameManager : MonoBehaviour
 
     public void StartTimer()
     {
-        _currentTimer = stageLimitTime;
+        if (!_isTimeDown)
+            _currentTimer = stageLimitTime;
         _isTimerRunning = true;
+    }
+
+    public void TimeDown(float timeLimit)
+    {
+        _currentTimer = timeLimit;
+        _isTimeDown = true;
     }
 
     public void StageClear()
@@ -226,6 +234,7 @@ public class CGameManager : MonoBehaviour
         // 등록된 모든 퍼즐을 비활성화 (이전 퍼즐 잔재 제거)
 
         _stageClear = false;
+        _isTimeDown = false;
         DisableAllStagePrefabs();
         int targetIndex = stage - 1;
 
