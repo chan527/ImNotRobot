@@ -11,6 +11,7 @@ public class CRobotTextCheckCanvasManager : MonoBehaviour
         public string sentence; // 문장 텍스트
         public bool isCorrect;  // 정답 문장 여부 (체크해야 하는 문장이면 true)
     }
+    bool isCorrect;
 
     [Header("UI References")]
     [SerializeField] private Transform itemContainer;          // ScrollView의 Content (생성된 항목들이 들어갈 위치)
@@ -33,6 +34,7 @@ public class CRobotTextCheckCanvasManager : MonoBehaviour
 
     private void OnEnable()
     {
+        isCorrect = false;
         InitStage();
     }
 
@@ -82,6 +84,8 @@ public class CRobotTextCheckCanvasManager : MonoBehaviour
     /// </summary>
     private void OnVerifyClicked()
     {
+        if (isCorrect)
+            return;
         int count = Mathf.Min(_spawnedBoxes.Count, sentenceList.Count);
         bool isAllTargetChecked = true;
 
@@ -100,6 +104,7 @@ public class CRobotTextCheckCanvasManager : MonoBehaviour
             Debug.Log("[Manager] 모든 정답 문장 체크 완료! 스테이지 클리어");
             if (CGameManager.Instance != null)
             {
+                isCorrect = true;
                 CGameManager.Instance.StageClear();
             }
         }

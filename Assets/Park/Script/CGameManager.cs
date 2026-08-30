@@ -31,6 +31,7 @@ public class CGameManager : MonoBehaviour
     [SerializeField] private float stageLimitTime = 60f; // 스테이지당 제한시간 (초 단위)
     private float _currentTimer = 60f;
     private bool _isTimerRunning = true;
+    private bool _stageClear;
 
     private List<int> _selectedStageList = new List<int>();
 
@@ -89,21 +90,23 @@ public class CGameManager : MonoBehaviour
 
     public void StageClear()
     {
+        if (_stageClear)
+            return;
+        _stageClear = true;
         Debug.Log($"[Stage {_currentStage}] 스테이지 클리어!");
+        
 
         // 진행 중인 타이머 멈춤 및 Success 코루틴 실행
         _isTimerRunning = false;
         StartCoroutine(StageClearRoutine());
     }
-
     private IEnumerator StageClearRoutine()
     {
-        // 마지막 스테이지인지 확인
         bool isFinalStage = (_currentStage >= _maxStage);
 
         if (!isFinalStage)
         {
-            // 1. 일반 스테이지 클리어 팝업 애니메이션 재생 (약 1초 소요)
+            // 일반 스테이지 클리어 로직
             if (successTextObject != null)
             {
                 yield return StartCoroutine(PopUpAnimation(successTextObject, 1.0f));
@@ -113,7 +116,6 @@ public class CGameManager : MonoBehaviour
                 yield return new WaitForSeconds(1.0f);
             }
 
-            // 2. 다음 스테이지 이동
             _currentStage++;
             UpdateStageUI(_currentStage);
         }
@@ -130,8 +132,25 @@ public class CGameManager : MonoBehaviour
             }
 
             Debug.Log("모든 스테이지 올 클리어 완료!");
-            // TODO: 메인 씬으로 이동하거나 엔딩 팝업 연동 등을 이곳에 추가할 수 있습니다.
+
+            // 2. 추가 대기 시간 (팝업이 닫히고 잠시 후 자연스럽게 종료하고 싶을 때)
+            yield return new WaitForSeconds(0.5f);
+
+            // 3. 게임 종료 호출
+            QuitGame();
         }
+    }
+    public void QuitGame()
+    {
+        Debug.Log("게임을 종료합니다.");
+
+#if UNITY_EDITOR
+        // 유니티 에디터에서 실행 중일 때 플레이 모드 종료
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+    // 실제 빌드된 게임(PC, Mobile 등) 종료
+    Application.Quit();
+#endif
     }
 
     public void StageFailed()
@@ -199,13 +218,15 @@ public class CGameManager : MonoBehaviour
         }
 
         targetObj.SetActive(false);
+
     }
 
     private void UpdateStageUI(int stage)
     {
         // 등록된 모든 퍼즐을 비활성화 (이전 퍼즐 잔재 제거)
-        DisableAllStagePrefabs();
 
+        _stageClear = false;
+        DisableAllStagePrefabs();
         int targetIndex = stage - 1;
 
         // 유효성 검사: 선택된 인덱스 리스트 및 프리팹 리스트 범위 안인지 확인

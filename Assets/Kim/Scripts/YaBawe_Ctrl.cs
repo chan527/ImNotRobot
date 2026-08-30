@@ -44,7 +44,9 @@ public class YaBawe_Ctrl : MonoBehaviour
         for (int i = 0; i < no_Btns.Length; i++)
         {
             no_Btns[i].interactable = false;
+            lifeCoin_Img[i].gameObject.SetActive(true);
         }
+
         //DiceReady();
         StartCoroutine(GameStart());
   
@@ -123,6 +125,11 @@ public class YaBawe_Ctrl : MonoBehaviour
         {
             yield return StartCoroutine(SwapUI(rand/15f));
         }
+
+        for (int i = 0; i < no_Btns.Length; i++)
+        {
+            no_Btns[i].interactable = true;
+        }
     }
 
     private IEnumerator SwapUI(float duration = 0.5f)
@@ -162,9 +169,9 @@ public class YaBawe_Ctrl : MonoBehaviour
         uiA.anchoredPosition = startB;
         uiB.anchoredPosition = startA;
 
-        for (int i = 0; i < no_Btns.Length; i++)
-        {
-            no_Btns[i].interactable = true;
-        }
+        //for (int i = 0; i < no_Btns.Length; i++)
+        //{
+        //    no_Btns[i].interactable = true;
+        //}
     }
 }
