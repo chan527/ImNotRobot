@@ -155,7 +155,7 @@ public class FontStageController : MonoBehaviour
 
         if (currentFontMode != FontMode.Clear)
             return false;
-        CGameManager.Instance.StageClear();
+
         return answerInput.text == answers[currentAnswerIndex];
     }
 
@@ -169,5 +169,10 @@ public class FontStageController : MonoBehaviour
         resultText.text = isCorrect
             ? "Verification complete."
             : "Verification failed.";
+
+        if (isCorrect)
+            CGameManager.Instance.StageClear();
+        else
+            CGameManager.Instance.StageFailed();
     }
 }
