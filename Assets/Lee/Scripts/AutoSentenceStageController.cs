@@ -97,7 +97,7 @@ public class AutoSentenceStageController : MonoBehaviour
 
     private void InitializeStage()
     {
-        CGameManager.Instance.TimeDown(20f);
+        CGameManager.Instance.TimeDown(30f);
 
         StopAutoComplete();
         hasTriggered = false;
