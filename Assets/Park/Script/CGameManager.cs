@@ -1,9 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CGameManager : MonoBehaviour
 {
+    private const string LoginPassword = "funOZJAMfun";
+
     // 외부에서 CGameManager.Instance 로 접근
     public static CGameManager Instance { get; private set; }
 
@@ -36,6 +40,11 @@ public class CGameManager : MonoBehaviour
 
     private List<int> _selectedStageList = new List<int>();
 
+    [SerializeField] private TMP_InputField passwordInput;
+    [SerializeField] private Button loginBtn;
+    [SerializeField] private GameObject loginPanel;
+
+
     private void Awake()
     {
         if (Instance == null)
@@ -49,14 +58,73 @@ public class CGameManager : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        if (loginBtn != null)
+        {
+            loginBtn.onClick.AddListener(LogIn);
+        }
+
+        if (passwordInput != null)
+        {
+            passwordInput.onSubmit.AddListener(LogIn);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (loginBtn != null)
+        {
+            loginBtn.onClick.RemoveListener(LogIn);
+        }
+
+        if (passwordInput != null)
+        {
+            passwordInput.onSubmit.RemoveListener(LogIn);
+        }
+    }
+
     private void Start()
+    {
+        SetDefaultWindow();
+    }
+
+    public void SetDefaultWindow()
     {
         // 게임 시작 시 UI 텍스트들이 켜져있다면 숨김 처리
         if (failTextObject != null) failTextObject.SetActive(false);
         if (successTextObject != null) successTextObject.SetActive(false);
         if (allClearTextObject != null) allClearTextObject.SetActive(false);
 
-        ChooseStageSequence();
+        _currentTimer = stageLimitTime;
+        _isTimerRunning = false;
+        DisableAllStagePrefabs();
+
+        if (loginPanel != null) loginPanel.SetActive(true);
+    }
+
+    public void LogIn()
+    {
+        LogIn(passwordInput != null ? passwordInput.text : string.Empty);
+    }
+
+    public void LogIn(string inputText)
+    {
+        if (inputText == LoginPassword)
+        {
+            StartGame();
+        }
+    }
+
+    public void StartGame()
+    {
+        // 2. 게임 리셋 및 재시작
+        _currentStage = 1;
+        _stageClear = false;
+        _isTimeDown = false;
+        _isTimerRunning = false;
+        if (loginPanel != null) loginPanel.SetActive(false);
+        ChooseStageSequence(); // 실패 시 고정 구간 이후 랜덤 순서 재구성
         UpdateStageUI(_currentStage);
     }
 
@@ -182,10 +250,7 @@ public class CGameManager : MonoBehaviour
             yield return new WaitForSeconds(1.0f);
         }
 
-        // 2. 게임 리셋 및 재시작
-        _currentStage = 1;
-        ChooseStageSequence(); // 실패 시 고정 구간 이후 랜덤 순서 재구성
-        UpdateStageUI(_currentStage);
+        SetDefaultWindow();
     }
 
     /// <summary>
